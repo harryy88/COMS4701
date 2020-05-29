@@ -1,4 +1,3 @@
-
 from __future__ import division
 from __future__ import print_function
 
@@ -53,6 +52,7 @@ class PuzzleState(object):
         """ Display this Puzzle state as a n*n board """
         for i in range(self.n):
             print(self.config[3*i : 3*(i+1)])
+        
 
     def move_up(self):
         ### STUDENT CODE GOES HERE ###
@@ -177,6 +177,8 @@ def get_path(state):
 def bfs_search(initial_state):
     """BFS search"""
     path_to_goal = []
+    fList = {}
+    eList = {}
     cost_of_path = 0
     nodes_expanded = -1
     search_depth = 0
@@ -184,19 +186,38 @@ def bfs_search(initial_state):
     ### STUDENT CODE GOES HERE ###
     frontier = Q.Queue()
     frontier.put(initial_state)
+    t = tuple(initial_state.config)
+    fList[t] = True
     explored = set()
     while frontier:
         state = frontier.get()
+        t = tuple(state.config)
+        fList[t] = False
         nodes_expanded += 1
         print("NODES_EXPANDED=", nodes_expanded)
         explored.add(state)
+        t = tuple(state.config)
+        eList[t] = True
         if test_goal(state.config): 
             writeOutput(get_path(state), nodes_expanded)
             return state
         
         for neighbor in state.expand(): 
-            
+
+                
+            # if neighbor.config in eList: continue
+            # if neighbor.config in fList: continue
             neighbor.parent = state
+            
+            try: 
+                if fList[tuple(neighbor.config)] == True:
+                    continue
+                if eList[tuple(neighbor.config)] == True:
+                    continue
+            except: 
+                pass
+            
+            """
             new = True 
             for fq in frontier.queue: 
                 if neighbor.config == fq.config:
@@ -208,8 +229,10 @@ def bfs_search(initial_state):
                         new = False
                         break
             if new == False: continue 
-           
+           """
             frontier.put(neighbor)
+            t = tuple(neighbor.config)
+            fList[t] = True
             #nodes_expanded += 1
            # if neighbor not in frontier.queue or neighbor not in explored:
            #    frontier.put(neighbor)
