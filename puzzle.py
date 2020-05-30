@@ -47,6 +47,9 @@ class PuzzleState(object):
 
         # Get the index and (row, col) of empty block
         self.blank_index = self.config.index(0)
+        
+    def __str___(self):
+        return str(self.config)
 
     def display(self):
         """ Display this Puzzle state as a n*n board """
@@ -164,6 +167,7 @@ def writeOutput(path,nodes_expanded):
 
 
 def get_path(state):
+
     path = []
     el = state
     while el is not None:
@@ -173,6 +177,7 @@ def get_path(state):
     path.remove("Initial")
     path.reverse()
     return path
+
 
 def bfs_search(initial_state):
     """BFS search"""
@@ -194,7 +199,6 @@ def bfs_search(initial_state):
         t = tuple(state.config)
         fList[t] = False
         nodes_expanded += 1
-        print("NODES_EXPANDED=", nodes_expanded)
         explored.add(state)
         t = tuple(state.config)
         eList[t] = True
@@ -207,7 +211,7 @@ def bfs_search(initial_state):
                 
             # if neighbor.config in eList: continue
             # if neighbor.config in fList: continue
-            neighbor.parent = state
+            
             
             try: 
                 if fList[tuple(neighbor.config)] == True:
@@ -216,6 +220,7 @@ def bfs_search(initial_state):
                     continue
             except: 
                 pass
+            neighbor.parent = state
             
             """
             new = True 
@@ -241,8 +246,103 @@ def bfs_search(initial_state):
 
 
 def dfs_search(initial_state):
-   pass
+ 
+
+    fList = {}
+    eList = {}
+    cost_of_path = 0
+    nodes_expanded = -1
+    search_depth = 0
+    max_search_depth = 0
+    ### STUDENT CODE GOES HERE ###
+    frontier = list()
+    frontier.append(initial_state)
+    t = tuple(initial_state.config)
+    fList[t] = True
+    explored = set()
+    while frontier:
+        state = frontier.pop()
+        t = tuple(state.config)
+        fList[t] = False
+        nodes_expanded += 1
+        explored.add(state)
+        t = tuple(state.config)
+        eList[t] = True
+        if test_goal(state.config): 
+            writeOutput(get_path(state), nodes_expanded)
+            return state
+        xxx = state.expand()
+        xxx.reverse()
+        for neighbor in xxx: 
+
+                
+            # if neighbor.config in eList: continue
+            # if neighbor.config in fList: continue
+            
+            
+            try: 
+                if fList[tuple(neighbor.config)] == True:
+                    continue
+                if eList[tuple(neighbor.config)] == True:
+                    continue
+            except: 
+                pass
+            neighbor.parent = state
+            
+            """
+            new = True 
+            for fq in frontier.queue: 
+                if neighbor.config == fq.config:
+                    new = False
+                    break 
+            if new == True: 
+                for fs in explored: 
+                    if neighbor.config == fs.config: 
+                        new = False
+                        break
+            if new == False: continue 
+           """
+            frontier.append(neighbor)
+            t = tuple(neighbor.config)
+            fList[t] = True
+            #nodes_expanded += 1
+           # if neighbor not in frontier.queue or neighbor not in explored:
+           #    frontier.put(neighbor)
+         
+    return False
+    """
+    frontier = list()
+    explored = set()
+    frontier.append(initial_state)
+    nodes_expanded = -1
+    state = None
+    while len(frontier) > 0: 
+        state = frontier.pop()
+        nodes_expanded += 1
+        explored.add(str(state.config))
+        print("NODES=",nodes_expanded )
+        if test_goal(state.config): 
+            writeOutput(get_path(state), nodes_expanded)
+            print("NODES_DONE=", nodes_expanded)
+            return state
         
+        for nb in state.expand(): 
+            skip = False
+            x = str(nb.config)
+            if x in explored: 
+               
+                continue
+            for ab in frontier: 
+                if ab.config == nb.config: 
+                    skip = True
+                    break
+            if skip == True: continue
+            
+            nb.parent = state
+            frontier.append(nb)
+         
+    return False
+    """
    
 
 def A_star_search(initial_state):
@@ -286,7 +386,7 @@ def main():
         
     end_time = time.time()
     print("Program completed in %.3f second(s)"%(end_time-start_time))
-    print(final_state)
+    #print(final_state)
     
     
 
