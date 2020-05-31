@@ -6,6 +6,7 @@ import math
 import time
 import queue as Q
 
+import heapq 
 
 #### SKELETON CODE ####
 ## The Class that Represents the Puzzle
@@ -40,6 +41,7 @@ class PuzzleState(object):
 
         self.n        = n
         self.cost     = cost
+        self.hcost = 0
         self.parent   = parent
         self.action   = action
         self.config   = config
@@ -127,6 +129,12 @@ class PuzzleState(object):
         new_config[self.blank_index + 1] = 0
         new_config[self.blank_index] = temp
         return PuzzleState(config=new_config, n=self.n)
+    
+    def __eq__(self, other):
+        return self.config == other.config
+    
+    def __lt__(self, other):
+        return self.hcost < other.hcost
       
     def expand(self):
         """ Generate the child nodes of this node """
@@ -164,6 +172,7 @@ class PuzzleState(object):
 def writeOutput(path,nodes_expanded):
     print("PATH = ", path)
     print("Number of Nodes Expanded= ", nodes_expanded)
+    print("Cost to path=", len(path))
 
 
 def get_path(state):
@@ -199,7 +208,7 @@ def bfs_search(initial_state):
         t = tuple(state.config)
         fList[t] = False
         nodes_expanded += 1
-        explored.add(state)
+        #explored.add(state)
         t = tuple(state.config)
         eList[t] = True
         if test_goal(state.config): 
@@ -259,13 +268,13 @@ def dfs_search(initial_state):
     frontier.append(initial_state)
     t = tuple(initial_state.config)
     fList[t] = True
-    explored = set()
+    #explored = set()
     while frontier:
         state = frontier.pop()
         t = tuple(state.config)
         fList[t] = False
         nodes_expanded += 1
-        explored.add(state)
+        #explored.add(state)
         t = tuple(state.config)
         eList[t] = True
         if test_goal(state.config): 
@@ -347,17 +356,90 @@ def dfs_search(initial_state):
 
 def A_star_search(initial_state):
     """A * search"""
+    path_to_goal = []
+    initial_state.cost = 0
+    initial_state.hcost = calculate_total_cost(initial_state)
+    fList = {}
+    eList = {}
+    cost_of_path = 0
+    nodes_expanded = -1
+    search_depth = 0
+    max_search_depth = 0
     ### STUDENT CODE GOES HERE ###
+    frontier = [initial_state]
+    heapq.heapify(frontier)
+    t = tuple(initial_state.config)
+    fList[t] = True
+    explored = set()
+    
+    while frontier:
+        state = heapq.heappop(frontier)
+        t = tuple(state.config)
+        fList[t] = False
+        nodes_expanded += 1
+        #print("NODES = ", nodes_expanded)
+        if tuple(state.config) not in eList:
+            t = tuple(state.config)
+            eList[t] = True
+        #explored.add(state)
+        
+        if test_goal(state.config): 
+            writeOutput(get_path(state), nodes_expanded)
+            return state
+        
+        for neighbor in state.expand():
+            
+            if tuple(neighbor.config) not in fList and tuple(neighbor.config) not in eList: 
+                neighbor.parent = state
+                neighbor.cost = state.cost + 1
+                neighbor.hcost = calculate_total_cost(neighbor)
+                heapq.heappush(frontier,neighbor)
+                t = tuple(neighbor.config)
+                fList[t] = True
+                continue
+            if tuple(neighbor.config) in fList: 
+                for puzzle in frontier: 
+                    if puzzle.config == neighbor.config:
+                        neighbor.parent = state
+                        neighbor.cost = state.cost + 1
+                        neighbor.hcost = calculate_total_cost(neighbor)
+                        if puzzle.hcost > neighbor.hcost:
+                           # print("COST B4=", puzzle.hcost ,"COST AFTER=", neighbor.hcost)
+                            frontier.remove(puzzle)
+                            frontier.append(neighbor)
+                            heapq.heapify(frontier)
+                            continue
+    
+            # if tuple(neighbor.config) in eList: continue
+           # if not in front or explored 
+            
+            #nodes_expanded += 1
+           # if neighbor not in frontier.queue or neighbor not in explored:
+           #    frontier.put(neighbor)
+         
+    return False
+ 
     pass
 
 def calculate_total_cost(state):
     """calculate the total estimated cost of a state"""
     ### STUDENT CODE GOES HERE ###
-    pass
+    man_dist = 0
+    for tile in state.config: 
+        if tile == 0: continue 
+        man_dist += calculate_manhattan_dist(state.config.index(tile), tile)
+        
+    return (state.cost + man_dist)
 
-def calculate_manhattan_dist(idx, value, n):
+def calculate_manhattan_dist(idx, value, n=None):
     """calculate the manhattan distance of a tile"""
     ### STUDENT CODE GOES HERE ###
+    col = { 0: 0, 3: 0, 6: 0, 1: 1, 4: 1, 7: 1, 2: 2, 5: 2, 8: 2 }
+    row = { 0: 0, 1: 0, 2: 0, 3: 1, 4: 1, 5: 1, 6: 2, 7: 2, 8: 2 }
+    current = [col[idx], row[idx]]
+    target = [col[value], row[value]]
+    return (abs(current[0]-target[0]) + abs(current[1]-target[1]))
+    
     pass
 
 def test_goal(puzzle_state):
