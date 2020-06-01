@@ -10,6 +10,10 @@ import heapq
 
 #### SKELETON CODE ####
 ## The Class that Represents the Puzzle
+
+start_time = None
+end_time = None
+
 class PuzzleState(object):
     """
         The PuzzleState stores a board configuration and implements
@@ -169,10 +173,29 @@ class PuzzleState(object):
 # Function that Writes to output.txt
 
 ### Students need to change the method to have the corresponding parameters
+import os
+import psutil
 def writeOutput(path,nodes_expanded):
-    print("PATH = ", path)
-    print("Number of Nodes Expanded= ", nodes_expanded)
-    print("Cost to path=", len(path))
+    print("path_to_goal:", path)
+    print("cost_of_path:", len(path))
+    print("nodes_expanded:", nodes_expanded)
+    print("search_depth:", len(path))
+    # To-do Max-Search Depth 
+    global end_time
+    global start_time
+    end_time = time.time()
+    print("running_time: %.3f"%(end_time-start_time))
+    process = psutil.Process(os.getpid())
+    print("max_ram_usage:", process.memory_info().rss / 1000000)  # in Mb
+    
+    f = open("output.txt", "w")
+    f.write("path_to_goal: " + str(path))
+    f.write("\ncost_of_path: " + str(len(path)))
+    f.write("\nnodes_expanded: " + str(nodes_expanded))
+    f.write("\nsearch_depth: " + str(len(path)))
+    f.write("\nmax_search_depth: TBD")
+    f.write("\nrunning_time: %.3f"%(end_time-start_time))
+    f.write("\nmax_ram_usage: " + str(process.memory_info().rss / 1000000)) # in Mb
 
 
 def get_path(state):
@@ -456,7 +479,7 @@ def main():
     board_size  = int(math.sqrt(len(begin_state)))
     hard_state  = PuzzleState(config=begin_state, n=board_size)
 
-    print("Running...")
+    global start_time
     start_time  = time.time()
     final_state = None
     if   search_mode == "bfs": 
@@ -466,8 +489,7 @@ def main():
     else: 
         print("Enter valid command arguments !")
         
-    end_time = time.time()
-    print("Program completed in %.3f second(s)"%(end_time-start_time))
+    
     #print(final_state)
     
     
