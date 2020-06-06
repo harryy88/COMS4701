@@ -19,6 +19,8 @@ class PuzzleState(object):
         The PuzzleState stores a board configuration and implements
         movement instructions to generate valid children.
     """
+    maxDepth = 0
+    
     def __init__(self, config, n, parent=None, action="Initial", cost=0):
         """
         print("CREATING PUZZE STATE")
@@ -50,12 +52,17 @@ class PuzzleState(object):
         self.action   = action
         self.config   = config
         self.children = []
+        self.depth = 0
+        
 
         # Get the index and (row, col) of empty block
         self.blank_index = self.config.index(0)
         
     def __str___(self):
         return str(self.config)
+    
+    def findMax(self, num):
+        PuzzleState.maxDepth = max(num, PuzzleState.maxDepth)
 
     def display(self):
         """ Display this Puzzle state as a n*n board """
@@ -175,11 +182,12 @@ class PuzzleState(object):
 ### Students need to change the method to have the corresponding parameters
 import os
 import psutil
-def writeOutput(path,nodes_expanded):
+def writeOutput(path,nodes_expanded, max_nodes):
     print("path_to_goal:", path)
     print("cost_of_path:", len(path))
     print("nodes_expanded:", nodes_expanded)
     print("search_depth:", len(path))
+    print("max_search_depth:", max_nodes)
     # To-do Max-Search Depth 
     global end_time
     global start_time
@@ -193,7 +201,7 @@ def writeOutput(path,nodes_expanded):
     f.write("\ncost_of_path: " + str(len(path)))
     f.write("\nnodes_expanded: " + str(nodes_expanded))
     f.write("\nsearch_depth: " + str(len(path)))
-    f.write("\nmax_search_depth: TBD")
+    f.write("\nmax_search_depth: " + max_nodes)
     f.write("\nrunning_time: %.3f"%(end_time-start_time))
     f.write("\nmax_ram_usage: " + str(process.memory_info().rss / 1000000)) # in Mb
 
@@ -213,37 +221,41 @@ def get_path(state):
 
 def bfs_search(initial_state):
     """BFS search"""
+    PuzzleState.maxCost = 0
     path_to_goal = []
     fList = {}
     eList = {}
     cost_of_path = 0
     nodes_expanded = -1
     search_depth = 0
-    max_search_depth = 0
     ### STUDENT CODE GOES HERE ###
     frontier = Q.Queue()
     frontier.put(initial_state)
     t = tuple(initial_state.config)
     fList[t] = True
     explored = set()
+    count = 0
     while frontier:
         state = frontier.get()
         t = tuple(state.config)
         fList[t] = False
         nodes_expanded += 1
+    
+        
         #explored.add(state)
         t = tuple(state.config)
         eList[t] = True
         if test_goal(state.config): 
-            writeOutput(get_path(state), nodes_expanded)
+            writeOutput(get_path(state), nodes_expanded, str(PuzzleState.maxDepth))
             return state
         
-        for neighbor in state.expand(): 
+        child_nodes = state.expand()
+        first_group_size = len(state.expand())
+        for neighbor in child_nodes: 
 
-                
+            count += 1
             # if neighbor.config in eList: continue
             # if neighbor.config in fList: continue
-            
             
             try: 
                 if fList[tuple(neighbor.config)] == True:
@@ -253,6 +265,15 @@ def bfs_search(initial_state):
             except: 
                 pass
             neighbor.parent = state
+            if count > first_group_size:
+                neighbor.depth = (state.depth + 1)
+                neighbor.findMax(neighbor.depth)
+            else: 
+                neighbor.depth = 1
+                neighbor.findMax(neighbor.depth)
+ 
+           
+
             
             """
             new = True 
@@ -279,19 +300,19 @@ def bfs_search(initial_state):
 
 def dfs_search(initial_state):
  
-
+    PuzzleState.maxCost = 0
     fList = {}
     eList = {}
     cost_of_path = 0
     nodes_expanded = -1
     search_depth = 0
-    max_search_depth = 0
     ### STUDENT CODE GOES HERE ###
     frontier = list()
     frontier.append(initial_state)
     t = tuple(initial_state.config)
     fList[t] = True
     #explored = set()
+    count = 0
     while frontier:
         state = frontier.pop()
         t = tuple(state.config)
@@ -301,17 +322,18 @@ def dfs_search(initial_state):
         t = tuple(state.config)
         eList[t] = True
         if test_goal(state.config): 
-            writeOutput(get_path(state), nodes_expanded)
+            writeOutput(get_path(state), nodes_expanded, str(PuzzleState.maxDepth))
             return state
         xxx = state.expand()
         xxx.reverse()
+        
+        first_group_size = len(xxx)
         for neighbor in xxx: 
 
                 
             # if neighbor.config in eList: continue
             # if neighbor.config in fList: continue
-            
-            
+            count += 1
             try: 
                 if fList[tuple(neighbor.config)] == True:
                     continue
@@ -319,7 +341,17 @@ def dfs_search(initial_state):
                     continue
             except: 
                 pass
+
+            
+            
             neighbor.parent = state
+            if count > first_group_size:
+                neighbor.depth = (state.depth + 1)
+                neighbor.findMax(neighbor.depth)
+            else: 
+                neighbor.depth = 1
+                neighbor.findMax(neighbor.depth)
+           
             
             """
             new = True 
@@ -394,7 +426,7 @@ def A_star_search(initial_state):
     t = tuple(initial_state.config)
     fList[t] = True
     explored = set()
-    
+    count = 0
     while frontier:
         state = heapq.heappop(frontier)
         t = tuple(state.config)
@@ -407,23 +439,31 @@ def A_star_search(initial_state):
         #explored.add(state)
         
         if test_goal(state.config): 
-            writeOutput(get_path(state), nodes_expanded)
+            writeOutput(get_path(state), nodes_expanded, str(PuzzleState.maxDepth))
             return state
         
-        for neighbor in state.expand():
+        child_nodes = state.expand()
+        first_group_size = len(state.expand())
+        for neighbor in child_nodes:
             
+            count += 1
+            neighbor.parent = state
             if tuple(neighbor.config) not in fList and tuple(neighbor.config) not in eList: 
-                neighbor.parent = state
                 neighbor.cost = state.cost + 1
                 neighbor.hcost = calculate_total_cost(neighbor)
                 heapq.heappush(frontier,neighbor)
                 t = tuple(neighbor.config)
                 fList[t] = True
+                if count > first_group_size:
+                    neighbor.depth = (state.depth + 1)
+                    neighbor.findMax(neighbor.depth)
+                else: 
+                    neighbor.depth = 1
+                    neighbor.findMax(neighbor.depth)
                 continue
             if tuple(neighbor.config) in fList: 
                 for puzzle in frontier: 
                     if puzzle.config == neighbor.config:
-                        neighbor.parent = state
                         neighbor.cost = state.cost + 1
                         neighbor.hcost = calculate_total_cost(neighbor)
                         if puzzle.hcost > neighbor.hcost:
@@ -431,6 +471,12 @@ def A_star_search(initial_state):
                             frontier.remove(puzzle)
                             frontier.append(neighbor)
                             heapq.heapify(frontier)
+                            if count > first_group_size:
+                                neighbor.depth = (state.depth + 1)
+                                neighbor.findMax(neighbor.depth)
+                            else: 
+                                neighbor.depth = 1
+                                neighbor.findMax(neighbor.depth)
                             continue
     
             # if tuple(neighbor.config) in eList: continue

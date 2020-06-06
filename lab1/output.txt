@@ -1,7 +1,7 @@
-path_to_goal: ['Down', 'Right', 'Down', 'Right', 'Up', 'Up', 'Left', 'Down', 'Down', 'Right', 'Up', 'Up', 'Left', 'Down', 'Down', 'Left', 'Up', 'Up', 'Right', 'Down', 'Down', 'Left', 'Up', 'Right', 'Down', 'Right', 'Up', 'Left', 'Up', 'Left']
-cost_of_path: 30
-nodes_expanded: 181423
-search_depth: 30
-max_search_depth: TBD
-running_time: 8.476
-max_ram_usage: 369.143808
+path_to_goal: ['Up', 'Left', 'Left']
+cost_of_path: 3
+nodes_expanded: 181437
+search_depth: 3
+max_search_depth: 66125
+running_time: 20.836
+max_ram_usage: 418.65216
