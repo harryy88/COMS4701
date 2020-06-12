@@ -1,6 +1,7 @@
 #!/usr/bin/env python
 #coding:utf-8
 import sys
+import time
 
 """
 Each sudoku board is represented as a dictionary with string keys and
@@ -325,10 +326,10 @@ if __name__ == '__main__':
             
             print_board(board)
 
-           # start_time = time.time()
+            start_time = time.time()
             solved_board = backtracking(board)
-           # end_time = time.time()
-            #print("TIME = ", end_time-start_time )
+            end_time = time.time()
+            print("TIME = ", end_time-start_time )
 
             #print(board_to_string(board))
 
@@ -351,7 +352,10 @@ if __name__ == '__main__':
         # Setup output file
         out_filename = 'output.txt'
         outfile = open(out_filename, "w")
-
+        readme_file = open("README.txt", "w")
+        
+        solved = 0
+        times = []
         # Solve each board using backtracking
         for line in sudoku_list.split("\n"):
 
@@ -366,19 +370,34 @@ if __name__ == '__main__':
             #print_board(board)
 
             # Solve with backtracking
-            #start_time = time.time()
+            start_time = time.time()
             solved_board = backtracking(board)
-           # end_time = time.time()
-           # print("TIME = ", end_time-start_time )
+            solved += 1
+            end_time = time.time()
+            times.append(end_time-start_time)
 
             # Print solved board. 
-            print("-------", board_to_string(board))
+            
 
             # Write board to file
             outfile.write(board_to_string(board))
             outfile.write('\n')
 
         print("Finishing all boards in file.")
+        readme_file.write("Harrison Groll- hsg2136 COMS 4701\n")
+        readme_file.write("Running Statistics: \n")
+        readme_file.write("\n\tNumber of Boards Solved: " + str(solved) )
+        readme_file.write("\n\tMinimum Board Run-time: " + str(min(times)))
+        readme_file.write("\n\tMaximum Board Run-time: " + str(max(times)))
+        readme_file.write("\n\tMean Board Run-time: " + str((sum(times)/len(times))))
+        
+
+        
+        import statistics
+        readme_file.write("\n\tSt. Dev Board Run-time: " +str( statistics.stdev(times)))
+        
+        readme_file.write("\n\nWOW :)")
+        readme_file.close()
         outfile.close()
         import datetime
         print(datetime.datetime.now())
