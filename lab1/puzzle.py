@@ -183,18 +183,18 @@ class PuzzleState(object):
 import os
 import psutil
 def writeOutput(path,nodes_expanded, max_nodes):
-    print("path_to_goal:", path)
-    print("cost_of_path:", len(path))
-    print("nodes_expanded:", nodes_expanded)
-    print("search_depth:", len(path))
-    print("max_search_depth:", max_nodes)
+    #print("path_to_goal:", path)
+    #print("cost_of_path:", len(path))
+    #print("nodes_expanded:", nodes_expanded)
+    #print("search_depth:", len(path))
+    #print("max_search_depth:", max_nodes)
     # To-do Max-Search Depth 
     global end_time
     global start_time
     end_time = time.time()
-    print("running_time: %.3f"%(end_time-start_time))
+    #print("running_time: %.8f"%(end_time-start_time))
     process = psutil.Process(os.getpid())
-    print("max_ram_usage:", process.memory_info().rss / 1000000)  # in Mb
+   # print("max_ram_usage: %.8f"%(process.memory_info().rss / 1000000))  # in Mb
     
     f = open("output.txt", "w")
     f.write("path_to_goal: " + str(path))
@@ -202,8 +202,8 @@ def writeOutput(path,nodes_expanded, max_nodes):
     f.write("\nnodes_expanded: " + str(nodes_expanded))
     f.write("\nsearch_depth: " + str(len(path)))
     f.write("\nmax_search_depth: " + max_nodes)
-    f.write("\nrunning_time: %.3f"%(end_time-start_time))
-    f.write("\nmax_ram_usage: " + str(process.memory_info().rss / 1000000)) # in Mb
+    f.write("\nrunning_time: %.8f"%(end_time-start_time))
+    f.write("\nmax_ram_usage: %.8f"%(process.memory_info().rss / 1000000)) # in Mb
 
 
 def get_path(state):
