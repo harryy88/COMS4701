@@ -337,6 +337,7 @@ if __name__ == '__main__':
             outfile = open(out_filename, "w")
             outfile.write(board_to_string(board))
             outfile.write('\n')
+            outfile.close()
 
     else:
 
