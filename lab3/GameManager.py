@@ -1,4 +1,4 @@
-from Grid       import Grid
+from Grid       import Grid  
 from ComputerAI import ComputerAI
 from IntelligentAgent  import IntelligentAgent
 from Displayer  import Displayer
